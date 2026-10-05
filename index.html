@@ -139,8 +139,12 @@
   /* ---------- Snack box (MONSTER MUNCHIES) ----------
      Everything inside .snack is laid out in the reference image's units
      (1146 x 1000), as percentages, so the whole box scales as one piece. */
-  .snack { position: absolute; z-index: 2; }
-  .snack > * { position: absolute; }
+  /* No z-index on .snack itself, so its layers stack with the headline (z 3): the warm glow
+     and shadow stay behind the words, the box and popcorn come in front (the bigger box may
+     overlap the headline, which Ethan is fine with). */
+  .snack { position: absolute; }
+  .snack > * { position: absolute; z-index: 4; }
+  .snack > .snack__glow, .snack > .snack__shadow { z-index: auto; }
   .snack__glow {
     left: -10%; top: -25%; width: 120%; height: 120%; border-radius: 50%; pointer-events: none;
     background: radial-gradient(closest-side, rgba(255,226,160,.75), rgba(255,226,160,.25) 60%, rgba(255,226,160,0));
@@ -186,7 +190,7 @@
     50% { text-shadow: 0 0 3px rgba(240,250,253,1), 0 0 10px rgba(220,243,252,1), 0 0 30px rgba(160,210,228,.9), 0 4px 6px rgba(0,0,0,.55); }
   }
   .snack__tag {
-    left: 50%; top: 117%; translate: -50% 0; z-index: 2; margin: 0; padding: .35em 1.1em .3em; text-align: center; white-space: nowrap;
+    left: 50%; top: 117%; translate: -50% 0; z-index: 5; margin: 0; padding: .35em 1.1em .3em; text-align: center; white-space: nowrap;
     font-family: "Creepster", Georgia, serif; font-size: calc(var(--bw, 400px) * .05); line-height: 1.1;
     color: #7a1016; background: linear-gradient(#f6efdc, #e9dcc0);
     clip-path: polygon(0 0, 100% 0, 97% 50%, 100% 100%, 0 100%, 3% 50%);
@@ -638,15 +642,23 @@
         left: cx - R_CX * k + 'px', top: cy - R_CY * k + 'px' });
       spinEl.style.transformOrigin = `${R_CX * k}px ${R_CY * k}px`;
       // Snack box down and to the left, staggered against the reel, with its tagline under it.
-      const bw = Math.min(W * (narrow ? 0.96 : 0.74), H * 0.5 * BW / BH), bh = bw * BH / BW;
-      const bx = narrow ? (W - bw) / 2 - W * 0.02 : W * 0.02;
+      // (bw0..by0 is the box's original size and spot; the headline still lines up with that.)
+      const bw0 = Math.min(W * (narrow ? 0.96 : 0.74), H * 0.5 * BW / BH), bh0 = bw0 * BH / BW;
+      const bx0 = narrow ? (W - bw0) / 2 - W * 0.02 : W * 0.02;
+      const by0 = H * 0.75 - bh0 * 0.98;
+      // Bigger box (Ethan: overlapping other parts is fine). It keeps its bottom edge; on
+      // desktop it grows up and to the right from the same left edge, on phones it stays
+      // centred (the box art spans ~12-93% of its frame, centre ~52.5%).
+      const GROW = narrow ? 1.2 : 1.35;
+      const bw = bw0 * GROW, bh = bh0 * GROW;
+      const bx = narrow ? W / 2 - bw * 0.525 : bx0;
       const by = H * 0.75 - bh * 0.98;
       Object.assign(snack.style, { left: bx + 'px', top: by + 'px', width: bw + 'px', height: bh + 'px' });
       snack.style.setProperty('--bw', bw + 'px');
-      // Headline sits just above the box, on the left, clear of the reel.
+      // Headline sits where it always did: just above the original box, on the left.
       const fs = W * 0.075;
-      Object.assign(headline.style, { left: bx + bw * 0.06 + 'px', fontSize: fs + 'px' });
-      headline.style.top = by + bh * 0.04 - headline.offsetHeight + 'px';
+      Object.assign(headline.style, { left: bx0 + bw0 * 0.06 + 'px', fontSize: fs + 'px' });
+      headline.style.top = by0 + bh0 * 0.04 - headline.offsetHeight + 'px';
       push.style.transformOrigin = `${bx + bw * 0.55}px ${by + bh * 0.5}px`;
       target = progress(); render(true);
     }
