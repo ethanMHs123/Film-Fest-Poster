@@ -41,15 +41,15 @@
     --W: min(100vw, 640px);
     position: absolute; z-index: 2; left: 0; right: 0; top: calc(var(--W) * .35); margin: 0;
     display: flex; align-items: center; justify-content: center; gap: .55em;
-    font-family: "Creepster", Georgia, serif; font-weight: 400; font-size: calc(var(--W) * .05);
-    line-height: 1; letter-spacing: .08em; color: #ffa040; white-space: nowrap; pointer-events: none;
+    font-family: "Ultra", Georgia, serif; font-weight: 400; font-size: calc(var(--W) * .044); text-transform: uppercase;
+    line-height: 1; letter-spacing: .04em; color: #ffa040; white-space: nowrap; pointer-events: none;
     --edge: 0 0 1px #000, 0 0 2px #000, 0 .06em .06em rgba(0,0,0,.9), 0 .1em .3em rgba(0,0,0,.7);
     text-shadow: var(--edge), 0 0 .3em rgba(255,140,40,.55);
     animation: dateIn .9s cubic-bezier(.2,1.4,.4,1) .3s both, dateFlicker 3.2s steps(1, end) 1.2s infinite;
   }
   .date sup { font-size: .55em; vertical-align: .7em; letter-spacing: .04em; }
   .date::before, .date::after { /* thin glowing rules either side */
-    content: ""; width: 2.2em; height: .09em; border-radius: 1em;
+    content: ""; width: 1.8em; height: .09em; border-radius: 1em;
     background: linear-gradient(90deg, rgba(255,160,64,0), #ffa040);
     box-shadow: 0 0 .25em rgba(255,140,40,.7), 0 .05em .1em rgba(0,0,0,.8);
   }
@@ -176,8 +176,8 @@
   /* ---------- Scene lettering ---------- */
   .scene__headline {
     position: absolute; z-index: 3; margin: 0; pointer-events: none;
-    font-family: "Creepster", Georgia, serif; font-weight: 400; line-height: 1.02; letter-spacing: .02em;
-    color: #3d5f70;
+    font-family: "Ultra", Georgia, serif; font-weight: 400; line-height: 1.08; letter-spacing: .02em;
+    text-transform: uppercase; color: #3d5f70;
     text-shadow: 0 0 2px rgba(235,248,252,1), 0 0 7px rgba(215,240,250,.95), 0 0 20px rgba(160,210,228,.7), 0 4px 6px rgba(0,0,0,.55);
     animation: glowBreathe 4.5s ease-in-out infinite;
   }
@@ -242,11 +242,10 @@
     .tix__price { font-size: 13cqi; }
     .tix__cta { font-size: 3.5cqi; }
     .tix__tickets { width: 62%; justify-self: center; grid-row: 1; }
-    .tix__warning { font-size: 5.2cqi; }
   }
   .tix__warning {
     grid-column: 1 / -1; margin: 6% 0 0; text-align: center; white-space: nowrap;
-    font-family: "Rubik Wet Paint", Impact, sans-serif; font-size: 4.4cqi; color: #e3202d; letter-spacing: .01em;
+    font-family: "Ultra", Georgia, serif; font-size: 3.6cqi; color: #e3202d; letter-spacing: .01em;
     /* a tight dark outline first, so the red holds up even over the orange pumpkin */
     --drop: 0 0 1px #000, 0 0 2px #000, 0 0 3px rgba(0,0,0,.9), 0 .06em .05em rgba(0,0,0,.95), 0 .1em .3em rgba(0,0,0,.8);
     text-shadow: var(--drop), 0 0 .2em rgba(255,40,40,.3);
@@ -254,6 +253,10 @@
   }
   @keyframes pulseRed {
     50% { text-shadow: var(--drop), 0 0 .25em rgba(255,60,50,.85), 0 0 .7em rgba(220,20,20,.6); }
+  }
+  /* phones: the warning goes onto two lines so it can stay big (after the rule above so it wins) */
+  @container (max-width: 480px) {
+    .tix__warning { font-size: 6.6cqi; line-height: 1.15; white-space: normal; text-wrap: balance; }
   }
   @media (prefers-reduced-motion: reduce) { .reel__grain, .bulb, .bulb-halo, .tix__price, .tix__cta, .tix__warning { animation: none; } }
   .title:focus-visible { outline: 2px dashed var(--blood); outline-offset: 4px; }
@@ -627,7 +630,7 @@
       Object.assign(snack.style, { left: bx + 'px', top: by + 'px', width: bw + 'px', height: bh + 'px' });
       snack.style.setProperty('--bw', bw + 'px');
       // Headline sits just above the box, on the left, clear of the reel.
-      const fs = W * 0.075;
+      const fs = W * 0.052;   /* Ultra is much wider than the old Creepster; this keeps the same line length */
       Object.assign(headline.style, { left: bx + bw * 0.06 + 'px', fontSize: fs + 'px' });
       headline.style.top = by + bh * 0.04 - headline.offsetHeight + 'px';
       push.style.transformOrigin = `${bx + bw * 0.55}px ${by + bh * 0.5}px`;
