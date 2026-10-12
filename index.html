@@ -192,12 +192,100 @@
     rotate: -2deg; filter: drop-shadow(0 4px 6px rgba(0,0,0,.35)); pointer-events: none;
   }
 
+  /* ---------- Showtimes (between the reel scene and the tickets) ----------
+     Comes in from the distance as the snack box flies past. The films deal in one by one
+     from alternating sides, and hovering (or tapping) a film plays its clip from the reel
+     in a little film frame above it. */
+  .sched {
+    position: relative; z-index: 1;
+    margin-top: -38vh; /* slides in over the end of the scene, while it pushes forward */
+    padding: 18vh 6% 0;
+    container-type: inline-size;
+    transform-origin: 50% 0; will-change: transform, opacity;
+  }
+  .sched::before { /* soft dark haze (no edges) so the light words read over the misty moon */
+    content: ""; position: absolute; inset: 10vh -12% -8vh; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(8,10,14,.7), rgba(8,10,14,.45) 55%, rgba(8,10,14,0));
+  }
+  .sched__when { /* same orange, outline and flicker as the date under the title */
+    margin: 0 0 4.5cqi; display: flex; align-items: center; justify-content: center; gap: .45em;
+    font-family: "Ultra", Georgia, serif; font-weight: 400; font-size: 6.6cqi; line-height: 1;
+    letter-spacing: .03em; color: #ffa040; white-space: nowrap;
+    --edge: 0 0 1px #000, 0 0 2px #000, 0 .06em .06em rgba(0,0,0,.9), 0 .1em .3em rgba(0,0,0,.7);
+    text-shadow: var(--edge), 0 0 .3em rgba(255,140,40,.55);
+    animation: dateFlicker 3.2s steps(1, end) infinite;
+  }
+  .sched__when::before, .sched__when::after {
+    content: ""; width: 1.4em; height: .08em; border-radius: 1em;
+    background: linear-gradient(90deg, rgba(255,160,64,0), #ffa040);
+    box-shadow: 0 0 .25em rgba(255,140,40,.7), 0 .05em .1em rgba(0,0,0,.8);
+  }
+  .sched__when::after { background: linear-gradient(90deg, #ffa040, rgba(255,160,64,0)); }
+  .sched__list { list-style: none; margin: 0 auto; padding: 0; max-width: 84cqi; }
+  .sched__row {
+    position: relative; display: flex; align-items: baseline; gap: .5em;
+    padding: .5em .55em; border-radius: .35em; cursor: default;
+    font-family: "Ultra", Georgia, serif; font-size: 3.5cqi; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .02em; color: #fbf3e4;
+    --drop: 0 0 1px rgba(0,0,0,.85), 0 .06em .05em rgba(0,0,0,.9), 0 .1em .35em rgba(0,0,0,.75);
+    text-shadow: var(--drop);
+    -webkit-tap-highlight-color: transparent;
+    /* dealt in one by one, from alternating sides, when the list scrolls into view */
+    opacity: 0; translate: -14cqi 0; rotate: -4deg;
+    transition: opacity .45s ease var(--d), translate .75s cubic-bezier(.2,1.35,.4,1) var(--d),
+      rotate .75s cubic-bezier(.2,1.35,.4,1) var(--d), scale .2s ease, background-color .2s ease;
+    --d: calc(var(--i) * 110ms);
+  }
+  .sched__row:nth-child(even) { translate: 14cqi 0; rotate: 4deg; }
+  .sched.is-in .sched__row { opacity: 1; translate: 0 0; rotate: 0deg; }
+  .sched__film { white-space: nowrap; transition: color .2s ease, text-shadow .2s ease; }
+  .sched__dots { /* menu-style dotted leader between the film and its time */
+    flex: 1; min-width: .8em; height: .3em; align-self: center; translate: 0 .15em;
+    background: radial-gradient(circle, #ffa040 .07em, transparent .09em) 0 50% / .42em .3em repeat-x;
+    filter: drop-shadow(0 0 1px #000); opacity: .75;
+  }
+  .sched__time {
+    white-space: nowrap; color: #ffa040;
+    text-shadow: var(--drop), 0 0 .3em rgba(255,140,40,.45);
+    transition: text-shadow .2s ease;
+  }
+  /* hover / tap: the row lifts, the title glows blood red and the time burns brighter */
+  .sched.is-in .sched__row.is-hot { scale: 1.05; background-color: rgba(115,18,30,.42); transition-delay: 0s; }
+  .sched__row.is-hot .sched__film { color: #fff; text-shadow: var(--drop), 0 0 .3em rgba(255,60,50,.9), 0 0 .8em rgba(220,20,20,.6); }
+  .sched__row.is-hot .sched__time { text-shadow: var(--drop), 0 0 .3em rgba(255,170,80,.95), 0 0 .8em rgba(255,110,30,.7); }
+  /* the clip preview: a film frame with sprocket holes top and bottom */
+  .sched__peek {
+    position: absolute; left: 0; top: 0; z-index: 3; width: 34cqi; pointer-events: none;
+    padding: 2.3cqi 0; background: #0b0b0b; border-radius: .5cqi;
+    box-shadow: 0 1.5cqi 3.5cqi rgba(0,0,0,.65), 0 0 2cqi rgba(255,120,60,.25);
+    opacity: 0; scale: .55; rotate: -8deg; transform-origin: 50% 100%;
+    transition: opacity .15s ease, scale .32s cubic-bezier(.2,1.5,.4,1), rotate .32s cubic-bezier(.2,1.5,.4,1);
+  }
+  .sched__peek.is-on { opacity: 1; scale: 1; rotate: -3deg; }
+  .sched__peek::before, .sched__peek::after {
+    content: ""; position: absolute; left: 1cqi; right: 1cqi; height: 1cqi;
+    background: repeating-linear-gradient(90deg, #ece6da 0 1.5cqi, transparent 1.5cqi 3.1cqi);
+  }
+  .sched__peek::before { top: .65cqi; }
+  .sched__peek::after { bottom: .65cqi; }
+  .sched__pic { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+  .sched__pic img { position: absolute; display: block; max-width: none; }
+  @container (max-width: 480px) {
+    .sched__when { font-size: 8.4cqi; }
+    .sched__list { max-width: none; margin: 0 -3cqi; }
+    .sched__row { font-size: 4.4cqi; padding: .5em .35em; letter-spacing: .01em; }
+    .sched__peek { width: 52cqi; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sched__when { animation: none; }
+    .sched__row { opacity: 1; translate: none; rotate: none; transition: none; }
+  }
+
   /* ---------- Tickets (end section) ----------
-     Comes in from the distance as the snack box flies past. Hovering the tickets
-     plays Ethan's ticket Lottie (the front ticket swings out). */
+     Comes in after the showtimes. Hovering the tickets plays Ethan's ticket Lottie
+     (the front ticket swings out). */
   .next {
     position: relative; z-index: 1; min-height: 100vh;
-    margin-top: -38vh; /* slides in over the end of the scene, while it pushes forward */
     display: grid; place-items: center; padding: 10vh 5%;
     transform-origin: 50% 0; will-change: transform, opacity;
   }
@@ -338,6 +426,22 @@
       </div>
     </section>
 
+    <section class="sched" id="sched" aria-label="Showtimes">
+      <h2 class="sched__when">10/31 &middot; 7AM&ndash;11PM</h2>
+      <!-- data-clip = the film's layer name in the reel Lottie (its clip plays on hover) -->
+      <ol class="sched__list" id="schedList">
+        <li class="sched__row" style="--i:0" data-clip="friday the 13th"><span class="sched__film">Friday the 13th</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T07:00">7AM</time></li>
+        <li class="sched__row" style="--i:1" data-clip="scream"><span class="sched__film">Scream</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T09:00">9AM</time></li>
+        <li class="sched__row" style="--i:2" data-clip="IT"><span class="sched__film">IT</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T11:00">11AM</time></li>
+        <li class="sched__row" style="--i:3" data-clip="the thing"><span class="sched__film">The Thing</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T13:00">1PM</time></li>
+        <li class="sched__row" style="--i:4" data-clip="scilence of the lambs"><span class="sched__film">The Silence of the Lambs</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T15:00">3PM</time></li>
+        <li class="sched__row" style="--i:5" data-clip="conjering"><span class="sched__film">The Conjuring</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T17:00">5PM</time></li>
+        <li class="sched__row" style="--i:6" data-clip="heres johnny"><span class="sched__film">The Shining</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T19:00">7PM</time></li>
+        <li class="sched__row" style="--i:7" data-clip="exorcist"><span class="sched__film">The Exorcist</span><span class="sched__dots" aria-hidden="true"></span><time class="sched__time" datetime="2026-10-31T21:00">9PM</time></li>
+      </ol>
+      <div class="sched__peek" id="schedPeek" aria-hidden="true"><div class="sched__pic"><img alt=""></div></div>
+    </section>
+
     <section class="next" id="next" aria-label="Tickets">
       <div class="tix">
         <div class="tix__copy">
@@ -428,7 +532,7 @@
   (function sceneFx() {
     const $ = id => document.getElementById(id);
     const scene = $('reel'), stage = $('reelStage'), push = $('reelPush');
-    const ring = $('reelRing'), spinEl = $('reelSpin'), next = $('next');
+    const ring = $('reelRing'), spinEl = $('reelSpin'), arrivals = [$('sched'), $('next')];
     const snack = $('snack'), candyBox = $('snackCandy'), bucketEl = $('snackBucket');
     const soda = $('snackSoda'), kernelsEl = $('snackKernels'), headline = $('headline');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -694,11 +798,12 @@
       push.style.opacity = ((1 - Math.pow(z, 1.6)) * (1 - over)).toFixed(3);
       push.style.filter = z > 0 ? `blur(${(e * 8).toFixed(2)}px)` : 'none';
       stage.style.setProperty('--reel-dim', (Math.min(1, qCur * 6) * (1 - z)).toFixed(3));
-      // Next section starts small and far away, then arrives as it scrolls in.
-      const nr = next.getBoundingClientRect();
-      const n = Math.min(1, Math.max(0, 1 - nr.top / vh));
-      next.style.transform = `scale(${0.7 + 0.3 * n})`;
-      next.style.opacity = Math.min(1, n * 1.4).toFixed(3);
+      // The showtimes, then the tickets, start small and far away, then arrive as they scroll in.
+      for (const el of arrivals) {
+        const n = Math.min(1, Math.max(0, 1 - el.getBoundingClientRect().top / vh));
+        el.style.transform = `scale(${0.7 + 0.3 * n})`;
+        el.style.opacity = Math.min(1, n * 1.4).toFixed(3);
+      }
       if (Math.abs(popT - popCur) > 0.0005 || Math.abs(qT - qCur) > 0.0005) raf = requestAnimationFrame(() => render());
       else raf = 0;
     }
@@ -756,6 +861,86 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', layout);
     document.fonts.ready.then(() => { if (loaded >= 3) layout(); });
+  })();
+
+  // ---------- Showtimes: deal the films in, and play a film's reel clip on hover ----------
+  (function showtimes() {
+    const sched = document.getElementById('sched'), list = document.getElementById('schedList');
+    const peek = document.getElementById('schedPeek'), img = peek.querySelector('img');
+    // The reel's frames include bits of film strip around the picture: this is the picture
+    // inside each clip's 400px-wide frames (x0, y0, x1, y1), keyed by the reel layer name.
+    const CROP = { 'it': [2, 2, 344, 196], 'scream': [86, 24, 382, 196], 'heres johnny': [10, 8, 364, 218],
+      'exorcist': [40, 14, 362, 214], 'conjering': [46, 50, 333, 215], 'friday the 13th': [57, 18, 366, 200],
+      'the thing': [58, 30, 344, 210], 'scilence of the lambs': [52, 6, 354, 186] };
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Each film's clip = the frames of its layer in the reel Lottie, found by layer name.
+    const comps = {}, pics = {}, frames = {};
+    REEL_DATA.assets.forEach(a => { if (a.layers) comps[a.id] = a; else if (a.p) pics[a.id] = a; });
+    (function walk(layers) {
+      layers.forEach(L => {
+        const comp = L.ty === 0 && comps[L.refId];
+        if (!comp) return;
+        const seq = comp.layers.filter(c => c.ty === 2);
+        if (!seq.length) return walk(comp.layers);
+        const ids = seq.map(c => c.refId).sort((a, b) => a.split('_f')[1] - b.split('_f')[1]);
+        const a0 = pics[ids[0]];   // frames were saved 400px wide, keeping the clip's shape
+        frames[L.nm.trim().toLowerCase()] = { urls: ids.map(id => pics[id].p), w: 400, h: Math.round(400 * a0.h / a0.w) };
+      });
+    })(REEL_DATA.layers);
+
+    // The films deal in one by one once the list scrolls into view.
+    if (reduceMotion || !('IntersectionObserver' in window)) sched.classList.add('is-in');
+    else new IntersectionObserver((entries, io) => {
+      if (entries.some(e => e.isIntersecting)) { sched.classList.add('is-in'); io.disconnect(); }
+    }, { threshold: 0.25 }).observe(list);
+
+    let hot = null, timer = 0, hideTimer = 0;
+    function show(row, x) {
+      clearTimeout(hideTimer);
+      if (row !== hot) {
+        if (hot) hot.classList.remove('is-hot');
+        hot = row; row.classList.add('is-hot');
+        const name = (row.dataset.clip || '').toLowerCase(), clip = frames[name];
+        const seq = clip ? clip.urls : [];
+        clearInterval(timer);
+        if (seq.length) {
+          // cover-fit the picture into the 16:9 frame (all in % of the frame)
+          const [x0, y0, x1, y1] = CROP[name] || [0, 0, clip.w, clip.h];
+          const sc = Math.max(16 / (x1 - x0), 9 / (y1 - y0));
+          Object.assign(img.style, { width: clip.w * sc / 16 * 100 + '%',
+            left: (-x0 * sc + (16 - (x1 - x0) * sc) / 2) / 16 * 100 + '%',
+            top: (-y0 * sc + (9 - (y1 - y0) * sc) / 2) / 9 * 100 + '%' });
+          let f = 0; img.src = seq[0];
+          if (!reduceMotion) timer = setInterval(() => { f = (f + 1) % seq.length; img.src = seq[f]; }, 160);
+        }
+        peek.classList.toggle('is-on', seq.length > 0);
+      }
+      // the clip sits just above the row, following the pointer sideways
+      const s = sched.getBoundingClientRect(), r = row.getBoundingClientRect();
+      const k = s.width / sched.offsetWidth;   // undo the section's arrival scale
+      const pw = peek.offsetWidth, ph = peek.offsetHeight;
+      const cx = x == null ? r.left + r.width * 0.35 : x;
+      const left = Math.max(0, Math.min(sched.clientWidth - pw, (cx - s.left) / k - pw / 2));
+      peek.style.left = left + 'px';
+      peek.style.top = (r.top - s.top) / k - ph - 6 + 'px';
+    }
+    function hide() {
+      if (hot) hot.classList.remove('is-hot');
+      hot = null; clearInterval(timer); peek.classList.remove('is-on');
+    }
+    list.addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') return;
+      const row = e.target.closest('.sched__row');
+      if (row) show(row, e.clientX);
+    });
+    list.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') hide(); });
+    // phones: tap a film to play its clip for a moment
+    list.addEventListener('click', e => {
+      if (matchMedia('(hover: hover)').matches) return;
+      const row = e.target.closest('.sched__row');
+      if (!row) return;
+      show(row, null); hideTimer = setTimeout(hide, 2600);
+    });
   })();
 </script>
 </body>
