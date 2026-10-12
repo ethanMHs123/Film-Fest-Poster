@@ -606,6 +606,35 @@
     stage.addEventListener('animationend', e => e.target.classList && e.target.classList.remove('is-boing'));
 
     // ---------- Film reel ----------
+    // Every clip stays right side up while the ring turns (like a Ferris wheel): each one
+    // gets a wrapper <g> that turns it back by the ring's angle, about its picture's centre.
+    const clips = [];
+    (function findClips() {
+      const comps = {};
+      REEL_DATA.assets.forEach(a => { if (a.layers) comps[a.id] = a; });
+      const walk = (layers, tilt) => layers.forEach(L => {
+        const comp = L.ty === 0 && comps[L.refId];
+        if (!comp) return;
+        const r = tilt + (L.ks.r ? L.ks.r.k : 0);
+        const pic = comp.layers.find(c => c.ty === 2);
+        if (!pic) return walk(comp.layers, r);   // a group of clips (the 'half' ring)
+        const p = L.ks.p.k, a = L.ks.a.k, s = L.ks.s.k[0] / 100, c = pic.ks.p.k;
+        L.ln = 'reelClip' + clips.length;        // Lottie gives the layer this id
+        clips.push({ id: L.ln, tilt: r, x: p[0] + (c[0] - a[0]) * s, y: p[1] + (c[1] - a[1]) * s, g: null });
+      });
+      walk(REEL_DATA.layers, 0);
+    })();
+    function upright(angle) {
+      for (const c of clips) {
+        if (!c.g) {
+          const el = document.getElementById(c.id);
+          if (!el) continue;
+          c.g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          el.parentNode.insertBefore(c.g, el); c.g.appendChild(el);
+        }
+        c.g.setAttribute('transform', `rotate(${(-angle - c.tilt).toFixed(3)} ${c.x.toFixed(1)} ${c.y.toFixed(1)})`);
+      }
+    }
     const reel = lottie.loadAnimation({
       container: spinEl, renderer: 'svg', loop: true, autoplay: !reduceMotion, animationData: REEL_DATA
     });
@@ -690,6 +719,7 @@
       const steps = (now - t0) / STEP_MS, kStep = Math.floor(steps);
       const angle = -45 * (kStep + stepShape(steps - kStep));
       spinEl.style.transform = `rotate(${angle.toFixed(3)}deg)`;
+      upright(angle);
       requestAnimationFrame(spin);
     }
     // Only animate while the scene is on screen.
@@ -719,7 +749,7 @@
     ticketsEl.addEventListener('blur', () => setTickets(false));
 
     let loaded = 0;
-    const onLoaded = () => { if (++loaded === 3) { layout(); if (!reduceMotion) requestAnimationFrame(spin); } };
+    const onLoaded = () => { if (++loaded === 3) { layout(); upright(0); if (!reduceMotion) requestAnimationFrame(spin); } };
     reel.addEventListener('DOMLoaded', onLoaded);
     bucket.addEventListener('DOMLoaded', onLoaded);
     kernels.addEventListener('DOMLoaded', onLoaded);
